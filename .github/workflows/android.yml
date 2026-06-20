@@ -1,47 +1,43 @@
 name: Build Xaim App
-on: [push]
 
-# GitHub Actions ko permissions dena taake build write kr sakay
-permissions: write-all
+on:
+  push:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    - name: Install Buildozer dependencies
+    - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3-pip build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libffi-dev libssl-dev autoconf automake libtool pkg-config cmake jnius openjdk-17-jdk unzip zip
+        sudo apt-get install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libffi-dev libssl-dev autoconf automake libtool pkg-config cmake jnius unzip zip
 
-    - name: Install Buildozer & Cython
+    - name: Install Buildozer
       run: |
         pip install --upgrade pip
         pip install buildozer cython virtualenv
 
-    - name: Auto Generate Fresh Spec File
-      run: |
-        rm -f buildozer.spec
-        buildozer init
-        sed -i 's/^title =.*/title = Xaim Downloader/g' buildozer.spec
-        sed -i 's/^package.name =.*/package.name = xaimdownloader/g' buildozer.spec
-        sed -i 's/^package.domain =.*/package.domain = com.xaimtech/g' buildozer.spec
-        sed -i 's/^requirements =.*/requirements = python3,kivy,yt-dlp,certifi,urllib3,idna,charset-normalizer/g' buildozer.spec
-        sed -i 's/^# android.permissions =.*/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/g' buildozer.spec
-        sed -i 's/^#android.api =.*/android.api = 33/g' buildozer.spec
-
-    - name: Build with Buildozer
+    - name: Build Android APK
       run: |
         export BUILDOZER_ALLOW_ORG_ERRORS=1
         buildozer android debug
-        
-    - name: Upload APK
+
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Xaim-Downloader-APK
