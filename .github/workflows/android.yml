@@ -22,9 +22,22 @@ jobs:
         pip install --upgrade pip
         pip install buildozer cython virtualenv
 
-    - name: Build with Buildozer (Safe Mode)
+    - name: Auto Generate Fresh Spec File
       run: |
-        # Agr buildozer spec root checks mangay toh handle krne k liye environment variable
+        # Agar purani file ka koi masla ho toh naye siray se custom file auto create krna
+        rm -f buildozer.spec
+        buildozer init
+        
+        # In-line configuration injection to avoid text errors
+        sed -i 's/^title =.*/title = Xaim Downloader/g' buildozer.spec
+        sed -i 's/^package.name =.*/package.name = xaimdownloader/g' buildozer.spec
+        sed -i 's/^package.domain =.*/package.domain = com.xaimtech/g' buildozer.spec
+        sed -i 's/^requirements =.*/requirements = python3,kivy,yt-dlp,certifi,urllib3,idna,charset-normalizer/g' buildozer.spec
+        sed -i 's/^# android.permissions =.*/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/g' buildozer.spec
+        sed -i 's/^#android.api =.*/android.api = 33/g' buildozer.spec
+
+    - name: Build with Buildozer
+      run: |
         export BUILDOZER_ALLOW_ORG_ERRORS=1
         buildozer android debug
         
