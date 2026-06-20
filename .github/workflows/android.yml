@@ -1,6 +1,9 @@
 name: Build Xaim App
 on: [push]
 
+# GitHub Actions ko permissions dena taake build write kr sakay
+permissions: write-all
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,11 +27,8 @@ jobs:
 
     - name: Auto Generate Fresh Spec File
       run: |
-        # Agar purani file ka koi masla ho toh naye siray se custom file auto create krna
         rm -f buildozer.spec
         buildozer init
-        
-        # In-line configuration injection to avoid text errors
         sed -i 's/^title =.*/title = Xaim Downloader/g' buildozer.spec
         sed -i 's/^package.name =.*/package.name = xaimdownloader/g' buildozer.spec
         sed -i 's/^package.domain =.*/package.domain = com.xaimtech/g' buildozer.spec
