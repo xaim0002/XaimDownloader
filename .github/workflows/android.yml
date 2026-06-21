@@ -6,6 +6,7 @@ on:
       - main
 
 jobs:
+
   build:
 
     runs-on: ubuntu-22.04
@@ -31,17 +32,19 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        packages: |
+          platform-tools
+          platforms;android-33
+          build-tools;33.0.2
 
 
-    - name: Accept Android Licenses and Install SDK
+    - name: Accept Android Licenses
       run: |
         yes | sdkmanager --licenses
-        sdkmanager "platform-tools"
-        sdkmanager "platforms;android-33"
-        sdkmanager "build-tools;33.0.2"
 
 
-    - name: Install Linux Dependencies
+    - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -66,8 +69,15 @@ jobs:
         pip install "cython<3.0.0"
 
 
+    - name: Configure Buildozer
+      run: |
+        mkdir -p ~/.buildozer
+        echo "sdk.dir=$ANDROID_HOME" > ~/.buildozer/android/platform/android-sdk/local.properties
+
+
     - name: Build APK
       run: |
+        buildozer android clean
         buildozer android debug
 
 
