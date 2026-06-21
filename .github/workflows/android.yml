@@ -6,14 +6,13 @@ on:
       - main
 
 jobs:
-
   build:
 
     runs-on: ubuntu-22.04
 
     steps:
 
-    - name: Checkout
+    - name: Checkout Code
       uses: actions/checkout@v4
 
 
@@ -34,7 +33,15 @@ jobs:
       uses: android-actions/setup-android@v3
 
 
-    - name: Install Dependencies
+    - name: Accept Android Licenses and Install SDK
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools"
+        sdkmanager "platforms;android-33"
+        sdkmanager "build-tools;33.0.2"
+
+
+    - name: Install Linux Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -56,7 +63,7 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install buildozer
-        pip install "cython<3"
+        pip install "cython<3.0.0"
 
 
     - name: Build APK
@@ -67,5 +74,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Xaim-Downloader
+        name: Xaim-Downloader-APK
         path: bin/*.apk
