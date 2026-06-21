@@ -17,37 +17,34 @@ jobs:
       uses: actions/checkout@v4
 
 
-    - name: Java 11 Setup
+    - name: Setup Java 17
       uses: actions/setup-java@v4
       with:
         distribution: temurin
-        java-version: "11"
+        java-version: "17"
 
 
-    - name: Python Setup
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
 
-    - name: Android SDK Setup
+    - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        packages: |
+          platform-tools
+          platforms;android-33
+          build-tools;33.0.2
 
 
-    - name: Accept Licenses
+    - name: Accept Android Licenses
       run: |
         yes | sdkmanager --licenses || true
 
 
-    - name: Install Android Packages
-      run: |
-        sdkmanager \
-        "platform-tools" \
-        "platforms;android-33" \
-        "build-tools;33.0.2"
-
-
-    - name: Dependencies
+    - name: Install Dependencies
       run: |
         sudo apt update
 
@@ -72,34 +69,18 @@ jobs:
         pip install "cython<3"
 
 
-    - name: Buildozer Config
-      run: |
-
-        mkdir -p ~/.buildozer/android/platform
-
-        echo "sdk.dir=$ANDROID_HOME"
-
-        rm -rf ~/.buildozer/android/platform/android-sdk
-
-        ln -s \
-        $ANDROID_HOME \
-        ~/.buildozer/android/platform/android-sdk
-
-
-    - name: Clean
+    - name: Clean Build
       run: |
         rm -rf .buildozer
+        rm -rf ~/.buildozer
 
 
     - name: Build APK
+      env:
+        ANDROID_HOME: /usr/local/lib/android/sdk
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
       run: |
-
-        export JAVA_HOME=$JAVA_HOME_11_X64
-
-        export ANDROID_HOME=/usr/local/lib/android/sdk
-
-        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-
         buildozer android debug
 
 
