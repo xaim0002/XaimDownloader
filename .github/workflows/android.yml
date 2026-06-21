@@ -22,10 +22,13 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Install Android SDK Tools
+      uses: android-actions/setup-android@v3
+
     - name: Install Critical Build Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip unzip autoconf automake libtool patch
+        sudo apt-get install -y zip unzip autoconf automake libtool patch visualenv python3-pip
 
     - name: Install Buildozer & Cython
       run: |
@@ -41,6 +44,7 @@ jobs:
         sed -i 's/^package.domain =.*/package.domain = com.xaimtech/g' buildozer.spec
         sed -i 's/^requirements =.*/requirements = python3,kivy/g' buildozer.spec
         sed -i 's/^# android.permissions =.*/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/g' buildozer.spec
+        sed -i 's/^# android.accept_sdk_license =.*/android.accept_sdk_license = y/g' buildozer.spec
 
     - name: Run Buildozer Compiler
       run: |
