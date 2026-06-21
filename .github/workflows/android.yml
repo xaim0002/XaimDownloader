@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.10'
 
     - name: Install Android SDK Tools
       uses: android-actions/setup-android@v3
@@ -28,12 +28,12 @@ jobs:
     - name: Install Critical Build Tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip unzip autoconf automake libtool libtool-bin m4 patch python3-pip python3-virtualenv pkg-config
+        sudo apt-get install -y zip unzip autoconf automake libtool libtool-bin m4 patch python3-pip python3-virtualenv pkg-config envsubst
 
     - name: Install Buildozer & Cython
       run: |
         pip install --upgrade pip
-        pip install buildozer cython virtualenv
+        pip install "buildozer>=1.5.0" "cython<3.0.0" virtualenv
 
     - name: Inject Fresh Spec File
       run: |
@@ -45,6 +45,7 @@ jobs:
         sed -i 's/^requirements =.*/requirements = python3,kivy/g' buildozer.spec
         sed -i 's/^# android.permissions =.*/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/g' buildozer.spec
         sed -i 's/^# android.accept_sdk_license =.*/android.accept_sdk_license = True/g' buildozer.spec
+        sed -i 's/^# p4a.branch =.*/p4a.branch = master/g' buildozer.spec
 
     - name: Run Buildozer Compiler
       run: |
