@@ -13,50 +13,52 @@ jobs:
 
     steps:
 
-    - name: Checkout Code
+    - name: Checkout
       uses: actions/checkout@v4
 
 
-    - name: Setup Java
+    - name: Java 11 Setup
       uses: actions/setup-java@v4
       with:
         distribution: temurin
-        java-version: "17"
+        java-version: "11"
 
 
-    - name: Setup Python
+    - name: Python Setup
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
 
-    - name: Setup Android SDK
+    - name: Android SDK Setup
       uses: android-actions/setup-android@v3
 
 
-    - name: Install Required Android SDK
+    - name: Accept Licenses
       run: |
-        yes | sdkmanager --licenses
+        yes | sdkmanager --licenses || true
 
+
+    - name: Install Android Packages
+      run: |
         sdkmanager \
         "platform-tools" \
         "platforms;android-33" \
         "build-tools;33.0.2"
 
 
-    - name: Install Linux Packages
+    - name: Dependencies
       run: |
-        sudo apt-get update
+        sudo apt update
 
-        sudo apt-get install -y \
+        sudo apt install -y \
+        git \
         zip \
         unzip \
         autoconf \
         automake \
         libtool \
         libtool-bin \
-        m4 \
-        patch \
         pkg-config \
         gettext \
         python3-pip \
@@ -67,18 +69,24 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install buildozer
-        pip install "cython<3.0.0"
+        pip install "cython<3"
 
 
-    - name: Configure Buildozer SDK
+    - name: Buildozer Config
       run: |
 
         mkdir -p ~/.buildozer/android/platform
 
-        ln -s $ANDROID_HOME ~/.buildozer/android/platform/android-sdk
+        echo "sdk.dir=$ANDROID_HOME"
+
+        rm -rf ~/.buildozer/android/platform/android-sdk
+
+        ln -s \
+        $ANDROID_HOME \
+        ~/.buildozer/android/platform/android-sdk
 
 
-    - name: Clean Old Files
+    - name: Clean
       run: |
         rm -rf .buildozer
 
@@ -86,7 +94,10 @@ jobs:
     - name: Build APK
       run: |
 
+        export JAVA_HOME=$JAVA_HOME_11_X64
+
         export ANDROID_HOME=/usr/local/lib/android/sdk
+
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
 
         buildozer android debug
